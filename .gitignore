@@ -1,3 +1,6 @@
+.DS_Store
+manifests/
+
 output/
 venv/
 .idea/
