@@ -61,7 +61,9 @@ class ApkHandler:
         """
         smali_paths = []
 
-        top_level_directories = ["smali", "smali_classes2"]
+        top_level_directories = list(
+            filter(lambda x: x.startswith("smali"),
+                   os.listdir(self.__output)))
 
         classpath_parts = classpath.split(".")
         class_name = classpath_parts[-1]
