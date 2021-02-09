@@ -28,8 +28,6 @@ class ManifestHandler:
         except AttributeError:
             self.__providers = []
 
-        print("hello")
-
     def get_permissions(self) -> List[UsesPermission]:
         return self.__uses_permissions
 

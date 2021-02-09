@@ -1,6 +1,7 @@
 from apk_handler import ApkHandler
 from manifest_handler import ManifestHandler
 from smali_handler import SmaliHandler
+import pprint
 
 
 def main():
@@ -15,8 +16,10 @@ def main():
         paths = apk_handler.get_smali_file_path(provider.name)
         for path in paths:
             smali_handler = SmaliHandler(path)
+            classpath = smali_handler.classpath
             invoked_methods = smali_handler.get_invoked_methods()
-            print(invoked_methods)
+
+            print(pprint.pprint({classpath: invoked_methods}))
 
 
 if __name__ == "__main__":
