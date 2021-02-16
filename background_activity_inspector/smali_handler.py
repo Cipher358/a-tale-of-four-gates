@@ -63,14 +63,14 @@ def find_invoked_methods(code_snippet):
     return invoked_methods
 
 
-def find_classpath(class_definition_section):
+def find_canonical_name(class_definition_section):
     for line in class_definition_section:
         if line.startswith(".class"):
             tokens = line.split(" ")
             for token in tokens:
                 if token.startswith("L"):
-                    classpath = token.replace("L", "").replace(";", "").replace("/", ".")
-                    return classpath
+                    canonical_name = token.replace("L", "").replace(";", "").replace("/", ".")
+                    return canonical_name
     return None
 
 
@@ -94,7 +94,7 @@ class SmaliHandler:
 
         file_sections = split_file_sections(content)
 
-        self.classpath = find_classpath(file_sections["class definition"])
+        self.canonical_name = find_canonical_name(file_sections["class definition"])
 
         self.methods = find_methods(file_sections.get("direct methods", {}))
         self.methods.update(find_methods(file_sections.get("virtual methods", {})))

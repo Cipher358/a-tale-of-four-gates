@@ -1,6 +1,7 @@
+import glob
+import os
 import shutil
 import subprocess
-import os
 
 
 class ApkHandler:
@@ -16,6 +17,7 @@ class ApkHandler:
             self.__output = "apk.out"
         else:
             self.__output = output
+        self.__smali_paths = None
 
     def extract_apk(self):
         """
@@ -47,48 +49,30 @@ class ApkHandler:
         else:
             raise IOError("Manifest file not found")
 
-    def get_smali_file_path(self, classpath):
-        """
-        Searches and returns the smali file matching the class from the given classpath.
-        The search is not recursive, instead it only looks at the files in specific directories
-        based on the class' package.
+    def get_smali_file_path(self, canonical_name):
+        return self.__smali_paths.get(canonical_name, None)
 
-        If the class extends another one, the parent class is also returned and its name will be:
-        className + "$1.smali"
-
-        :param classpath: the classpath of the smali file
-        :return: list of the matching smali files.
-        """
+    def build_class_canonical_name_file_path_dict(self):
         smali_paths = []
 
         top_level_directories = list(
-            filter(lambda x: x.startswith("smali"),
-                   os.listdir(self.__output)))
+            map(lambda x: self.__output + "/" + x,
+                filter(lambda x: x.startswith("smali"),
+                       os.listdir(self.__output))))
 
-        classpath_parts = classpath.split(".")
-        class_name = classpath_parts[-1]
-        class_package = classpath_parts[:-1]
+        for directory in top_level_directories:
+            result = glob.glob(directory + '/**/*.smali', recursive=True)
+            smali_paths.extend(result)
 
-        package_directories = "/".join(class_package)
-        possible_smali_directories = list(
-            map(lambda x: self.__output + "/" + x + "/" + package_directories,
-                top_level_directories))
+        name_path_dict = dict()
+        for smali_path in smali_paths:
+            parts = smali_path.split("/")
+            del parts[0]
+            del parts[0]
+            canonical_name = ".".join(parts).replace(".smali", "")
+            name_path_dict[canonical_name] = smali_path
 
-        for directory in possible_smali_directories:
-            try:
-                files = os.listdir(directory)
-                matching_smali_files = list(
-                    map(lambda x: directory + "/" + x,
-                        list(filter(lambda x: x.__contains__(class_name),
-                                    files))))
-                smali_paths += matching_smali_files
-            except FileNotFoundError:
-                continue
-
-        if len(smali_paths) == 0:
-            raise IOError("Smali file not found")
-
-        return smali_paths
+        self.__smali_paths = name_path_dict
 
     def cleanup(self):
         """
