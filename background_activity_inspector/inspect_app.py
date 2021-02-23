@@ -119,16 +119,20 @@ def main(argv):
     manifest_handler = ManifestHandler(manifest_path)
     providers = manifest_handler.get_providers()
     services = manifest_handler.get_services()
+    activities = manifest_handler.get_activities()
 
     targets = list()
     if inspection_filter is None:
         targets.extend(providers)
         targets.extend(services)
+        targets.extend(activities)
     else:
         if "providers" in inspection_filter["targets"]:
             targets.extend(providers)
         if "services" in inspection_filter["targets"]:
             targets.extend(services)
+        if "activities" in inspection_filter["targets"]:
+            targets.extend(activities)
 
     for target in targets:
         print("Info for target " + target.name + ":")
@@ -151,7 +155,7 @@ def main(argv):
                 print("Target matches the filter. Stack trace information below:")
                 pprint.pp(stack_trace)
 
-        print("\n\n")
+        print("\n//////////////////////////////////////////\n")
 
 
 if __name__ == "__main__":

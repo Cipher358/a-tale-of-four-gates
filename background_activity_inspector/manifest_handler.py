@@ -1,7 +1,7 @@
 import untangle
 from typing import List
 
-from manifest_elements import UsesPermission, ContentProvider, Service
+from manifest_elements import UsesPermission, ContentProvider, Service, Activity, ManifestElement
 
 
 class ManifestHandler:
@@ -28,11 +28,19 @@ class ManifestHandler:
         except AttributeError:
             self.__providers = []
 
-    def get_permissions(self) -> List[UsesPermission]:
+        try:
+            self.__activities = list(map(lambda x: Activity(x), manifest.application.activity))
+        except AttributeError:
+            self.__activities = []
+
+    def get_permissions(self) -> List[ManifestElement]:
         return self.__uses_permissions
 
-    def get_providers(self) -> List[ContentProvider]:
+    def get_activities(self) -> List[ManifestElement]:
+        return self.__activities
+
+    def get_providers(self) -> List[ManifestElement]:
         return self.__providers
 
-    def get_services(self) -> List[Service]:
+    def get_services(self) -> List[ManifestElement]:
         return self.__services

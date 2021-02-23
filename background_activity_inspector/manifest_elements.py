@@ -5,9 +5,66 @@ def prepend_android(text):
     return "android:" + text
 
 
-class ContentProvider:
+class ManifestElement:
+
+    def __init__(self):
+        self.name = ""
+
+    def __str__(self):
+        properties = list(filter(lambda x: x[1] is not None, vars(self).items()))
+        return "{" + ','.join("\n    %s: %s" % item for item in properties) + "\n}"
+
+
+class Activity(ManifestElement):
 
     def __init__(self, xml_element: Element):
+        super().__init__()
+        self.allow_embedded = xml_element.get_attribute(prepend_android("allowEmbedded"))
+        self.allow_task_reparenting = xml_element.get_attribute(prepend_android("allowTaskReparenting"))
+        self.always_retain_task_state = xml_element.get_attribute(prepend_android("alwaysRetainTaskState"))
+        self.auto_remove_from_recents = xml_element.get_attribute(prepend_android("autoRemoveFromRecents"))
+        self.banner = xml_element.get_attribute(prepend_android("banner"))
+        self.clear_task_on_launch = xml_element.get_attribute(prepend_android("clearTaskOnLaunch"))
+        self.color_mode = xml_element.get_attribute(prepend_android("colorMode"))
+        self.config_changes = xml_element.get_attribute(prepend_android("configChanges"))
+        self.direct_boot_aware = xml_element.get_attribute(prepend_android("directBootAware"))
+        self.document_launch_mode = xml_element.get_attribute(prepend_android("documentLaunchMode"))
+        self.enabled = xml_element.get_attribute(prepend_android("enabled"))
+        self.exclude_from_recents = xml_element.get_attribute(prepend_android("excludeFromRecents"))
+        self.exported = xml_element.get_attribute(prepend_android("exported"))
+        self.finish_on_task_launch = xml_element.get_attribute(prepend_android("finishOnTaskLaunch"))
+        self.hardware_accelerated = xml_element.get_attribute(prepend_android("hardwareAccelerated"))
+        self.icon = xml_element.get_attribute(prepend_android("icon"))
+        self.immersive = xml_element.get_attribute(prepend_android("immersive"))
+        self.label = xml_element.get_attribute(prepend_android("label"))
+        self.launch_mode = xml_element.get_attribute(prepend_android("launchMode"))
+        self.lock_task_mode = xml_element.get_attribute(prepend_android("lockTaskMode"))
+        self.max_recents = xml_element.get_attribute(prepend_android("maxRecents"))
+        self.max_aspect_ratio = xml_element.get_attribute(prepend_android("maxAspectRatio"))
+        self.multiprocess = xml_element.get_attribute(prepend_android("multiprocess"))
+        self.name = xml_element.get_attribute(prepend_android("name"))
+        self.no_history = xml_element.get_attribute(prepend_android("noHistory"))
+        self.parent_activity_name = xml_element.get_attribute(prepend_android("parentActivityName"))
+        self.persistable_mode = xml_element.get_attribute(prepend_android("persistableMode"))
+        self.permission = xml_element.get_attribute(prepend_android("permission"))
+        self.process = xml_element.get_attribute(prepend_android("process"))
+        self.relinquish_task_identity = xml_element.get_attribute(prepend_android("relinquishTaskIdentity"))
+        self.resizeable_activity = xml_element.get_attribute(prepend_android("resizeableActivity"))
+        self.screen_orientation = xml_element.get_attribute(prepend_android("screenOrientation"))
+        self.show_for_all_users = xml_element.get_attribute(prepend_android("showForAllUsers"))
+        self.state_not_needed = xml_element.get_attribute(prepend_android("stateNotNeeded"))
+        self.supports_picture_in_picture = xml_element.get_attribute(prepend_android("supportsPictureInPicture"))
+        self.task_affinity = xml_element.get_attribute(prepend_android("taskAffinity"))
+        self.theme = xml_element.get_attribute(prepend_android("theme"))
+        self.ui_options = xml_element.get_attribute(prepend_android("uiOptions"))
+        self.window_soft_input_mode = xml_element.get_attribute(prepend_android("windowSoftInputMode"))
+
+
+class ContentProvider(ManifestElement):
+
+    def __init__(self, xml_element: Element):
+        super().__init__()
+
         self.authorities = xml_element.get_attribute(prepend_android("authorities"))
         self.name = xml_element.get_attribute(prepend_android("name"))
         self.grant_uri_permission = xml_element.get_attribute(prepend_android("grantUriPermission"))
@@ -23,12 +80,11 @@ class ContentProvider:
         self.icon = xml_element.get_attribute(prepend_android("icon"))
         self.label = xml_element.get_attribute(prepend_android("label"))
 
-    def __str__(self):
-        return "{" + ','.join("\n    %s: %s" % item for item in vars(self).items()) + "\n}"
 
-
-class Service:
+class Service(ManifestElement):
     def __init__(self, xml_element: Element):
+        super().__init__()
+
         self.description = xml_element.get_attribute(prepend_android("description"))
         self.direct_boot_aware = xml_element.get_attribute(prepend_android("directBootAware"))
         self.enabled = xml_element.get_attribute(prepend_android("enabled"))
@@ -41,14 +97,10 @@ class Service:
         self.permission = xml_element.get_attribute(prepend_android("permission"))
         self.process = xml_element.get_attribute(prepend_android("process"))
 
-    def __str__(self):
-        return "{" + ','.join("\n    %s: %s" % item for item in vars(self).items()) + "\n}"
 
-
-class UsesPermission:
+class UsesPermission(ManifestElement):
     def __init__(self, xml_element: Element):
+        super().__init__()
+
         self.name = xml_element.get_attribute(prepend_android("name"))
         self.max_sdk_version = xml_element.get_attribute(prepend_android("maxSdkVersion"))
-
-    def __str__(self):
-        return "{" + ','.join("\n    %s: %s" % item for item in vars(self).items()) + "\n}"
