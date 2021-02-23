@@ -102,8 +102,8 @@ def extract_command_line_arguments(argv):
         with open(filter_file_path, 'r') as filter_file:
             data = filter_file.read()
             inspection_filter = json.loads(data)
-    except Exception:
-        print("The filter file was invalid. Running the program as if it's missing")
+    except IOError:
+        print("The filter file was invalid. Running the program as if it's missing.")
         inspection_filter = None
 
     return apk_path, inspection_filter
@@ -121,13 +121,17 @@ def main(argv):
     services = manifest_handler.get_services()
 
     targets = list()
-    if "providers" in inspection_filter["targets"]:
+    if inspection_filter is None:
         targets.extend(providers)
-    if "services" in inspection_filter["targets"]:
         targets.extend(services)
+    else:
+        if "providers" in inspection_filter["targets"]:
+            targets.extend(providers)
+        if "services" in inspection_filter["targets"]:
+            targets.extend(services)
 
     for target in targets:
-        print("Info for target " + target.name)
+        print("Info for target " + target.name + ":")
         print(target)
 
         apk_handler.build_class_canonical_name_file_path_dict()
@@ -139,12 +143,13 @@ def main(argv):
         smali_handler = SmaliHandler(path)
         stack_trace = build_stack_trace_for_class(apk_handler, smali_handler)
 
-        matches_filter = does_stack_trace_contain_method(stack_trace, inspection_filter[
-            "method_filters"]) or does_stack_trace_contain_class(stack_trace, inspection_filter["object_filters"])
+        if inspection_filter is not None:
+            matches_filter = does_stack_trace_contain_method(stack_trace, inspection_filter[
+                "method_filters"]) or does_stack_trace_contain_class(stack_trace, inspection_filter["object_filters"])
 
-        if matches_filter:
-            print("Target matches the filter. Stack trace information below:")
-            pprint.pp(stack_trace)
+            if matches_filter:
+                print("Target matches the filter. Stack trace information below:")
+                pprint.pp(stack_trace)
 
         print("\n\n")
 
