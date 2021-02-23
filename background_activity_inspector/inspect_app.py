@@ -1,15 +1,28 @@
+import getopt
+import json
 import pprint
+import sys
 
 from apk_handler import ApkHandler
 from manifest_handler import ManifestHandler
 from smali_handler import SmaliHandler
 
 
-def does_stack_trace_contain(stack_trace, java_class):
-    for used_class, invoked_methods in stack_trace.items():
-        for method, called_methods in invoked_methods.items():
-            for called_object in called_methods.keys():
-                if called_object == java_class:
+def does_stack_trace_contain_method(stack_trace, methods):
+    for top_level_class, invoked_methods in stack_trace.items():
+        for top_level_method, invocations in invoked_methods.items():
+            for called_object, called_methods in invocations.items():
+                for called_method in called_methods:
+                    if called_object + ":" + called_method in methods:
+                        return True
+    return False
+
+
+def does_stack_trace_contain_class(stack_trace, java_classes):
+    for top_level_class, invoked_methods in stack_trace.items():
+        for top_level_method, invocations in invoked_methods.items():
+            for called_object in invocations.keys():
+                if called_object in java_classes:
                     return True
     return False
 
@@ -63,19 +76,62 @@ def build_stack_trace_for_class(apk_handler, smali_handler):
     return stack_trace
 
 
-def main():
-    apk_handler = ApkHandler("../app-content-provider.apk")
+def extract_command_line_arguments(argv):
+    apk_path = ""
+    filter_file_path = ""
+
+    try:
+        opts, args = getopt.getopt(argv, "a:f:", ["apk", "filter"])
+    except getopt.GetoptError:
+        print("python inspect.py --apk <apk_file> --filter <filter_file>")
+        sys.exit(2)
+    for opt, arg in opts:
+        if opt in ["-h", "--help"]:
+            print("python inspect.py --apk <apk_file> --filter <filter_file>")
+            sys.exit()
+        elif opt in ["-a", "--apk"]:
+            apk_path = arg
+        elif opt in ["-f", "filter"]:
+            filter_file_path = arg
+
+    if apk_path == "":
+        print("The apk path is mandatory. Use the '-h' flag for more help!")
+        sys.exit()
+
+    try:
+        with open(filter_file_path, 'r') as filter_file:
+            data = filter_file.read()
+            inspection_filter = json.loads(data)
+    except Exception:
+        print("The filter file was invalid. Running the program as if it's missing")
+        inspection_filter = None
+
+    return apk_path, inspection_filter
+
+
+def main(argv):
+    apk, inspection_filter = extract_command_line_arguments(argv)
+
+    apk_handler = ApkHandler(apk)
     # apk_handler.extract_apk()
     manifest_path = apk_handler.get_manifest_file_path()
 
     manifest_handler = ManifestHandler(manifest_path)
     providers = manifest_handler.get_providers()
+    services = manifest_handler.get_services()
 
-    for provider in providers:
-        print("Info for provider " + provider.name)
+    targets = list()
+    if "providers" in inspection_filter["targets"]:
+        targets.extend(providers)
+    if "services" in inspection_filter["targets"]:
+        targets.extend(services)
+
+    for target in targets:
+        print("Info for target " + target.name)
+        print(target)
 
         apk_handler.build_class_canonical_name_file_path_dict()
-        path = apk_handler.get_smali_file_path(provider.name)
+        path = apk_handler.get_smali_file_path(target.name)
 
         if path is None:
             continue
@@ -83,6 +139,15 @@ def main():
         smali_handler = SmaliHandler(path)
         stack_trace = build_stack_trace_for_class(apk_handler, smali_handler)
 
+        matches_filter = does_stack_trace_contain_method(stack_trace, inspection_filter[
+            "method_filters"]) or does_stack_trace_contain_class(stack_trace, inspection_filter["object_filters"])
+
+        if matches_filter:
+            print("Target matches the filter. Stack trace information below:")
+            pprint.pp(stack_trace)
+
+        print("\n\n")
+
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1:])

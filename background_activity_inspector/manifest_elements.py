@@ -23,6 +23,9 @@ class ContentProvider:
         self.icon = xml_element.get_attribute(prepend_android("icon"))
         self.label = xml_element.get_attribute(prepend_android("label"))
 
+    def __str__(self):
+        return "{" + ','.join("\n    %s: %s" % item for item in vars(self).items()) + "\n}"
+
 
 class Service:
     def __init__(self, xml_element: Element):
@@ -38,8 +41,14 @@ class Service:
         self.permission = xml_element.get_attribute(prepend_android("permission"))
         self.process = xml_element.get_attribute(prepend_android("process"))
 
+    def __str__(self):
+        return "{" + ','.join("\n    %s: %s" % item for item in vars(self).items()) + "\n}"
+
 
 class UsesPermission:
     def __init__(self, xml_element: Element):
         self.name = xml_element.get_attribute(prepend_android("name"))
         self.max_sdk_version = xml_element.get_attribute(prepend_android("maxSdkVersion"))
+
+    def __str__(self):
+        return "{" + ','.join("\n    %s: %s" % item for item in vars(self).items()) + "\n}"

@@ -1,0 +1,5 @@
+{
+  "targets": ["providers", "services"],
+  "object_filters": ["java.lang.StringBuilder"],
+  "method_filters": ["java.lang.Integer:toString"]
+}
