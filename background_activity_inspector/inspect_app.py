@@ -9,6 +9,9 @@ from smali_handler import SmaliHandler
 
 
 def does_stack_trace_contain_method(stack_trace, methods):
+    """
+    Returns true if at least one method present in the stack trace is included in the method filter.
+    """
     for top_level_class, invoked_methods in stack_trace.items():
         for top_level_method, invocations in invoked_methods.items():
             for called_object, called_methods in invocations.items():
@@ -19,6 +22,9 @@ def does_stack_trace_contain_method(stack_trace, methods):
 
 
 def does_stack_trace_contain_class(stack_trace, java_classes):
+    """
+    Returns true if at least one class present in the stack trace is included in the class filter.
+    """
     for top_level_class, invoked_methods in stack_trace.items():
         for top_level_method, invocations in invoked_methods.items():
             for called_object in invocations.keys():
@@ -28,6 +34,24 @@ def does_stack_trace_contain_class(stack_trace, java_classes):
 
 
 def build_stack_trace_for_class(apk_handler, smali_handler):
+    """
+    Builds a stack trace like data structure for the java class associated to the given smali handler.
+
+    The structure is as follows:
+    dict(key = top level class,
+         value = dict(key = top level method,
+                      value = dict(key = called object,
+                                   value = set(called method)
+                      )
+         )
+
+    If an object is is called inside a top level class and it has a smali class, then the class of that object
+    will be considered a top level class as well, recursively building the stack trace across different classes.
+
+    :param apk_handler: the apk handler that gets used to create smali handlers for the called objects
+    :param smali_handler: the smali handler of the object for which the stack trace is built
+    :return: the stack trace like data structure defined above
+    """
     visited_classes = set()
     canonical_name = smali_handler.canonical_name
     invoked_methods = smali_handler.invoked_methods
@@ -113,7 +137,7 @@ def main(argv):
     apk, inspection_filter = extract_command_line_arguments(argv)
 
     apk_handler = ApkHandler(apk)
-    # apk_handler.extract_apk()
+    apk_handler.extract_apk()
     manifest_path = apk_handler.get_manifest_file_path()
 
     manifest_handler = ManifestHandler(manifest_path)
