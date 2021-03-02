@@ -2,11 +2,16 @@
   "targets": [
     "providers"
   ],
-  "object_filters": [
-    "android.hardware.Camera",
-    "androidx.camera.lifecycle.ProcessCameraProvider",
-    "androidx.camera.core.CameraXConfig.Provider",
-    "android.hardware.camera2.CameraDevice"
-  ],
-  "method_filters": []
+  "object_filters": [],
+  "method_filters": [
+    "android.hardware.Camera:takePicture",
+    "android.hardware.camera2.CameraCaptureSession:capture",
+    "android.hardware.camera2.CameraCaptureSession:captureBurst",
+    "android.hardware.camera2.CameraCaptureSession:captureBurstRequests",
+    "android.hardware.camera2.CameraCaptureSession:captureSingleRequest",
+    "androidx.camera.core.ImageCapture:takePicture",
+    "android.media.MediaRecorder:start",
+    "android.media.AudioRecord:read",
+    "android.media.AudioRecord:startRecording"
+  ]
 }
