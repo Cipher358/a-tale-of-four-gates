@@ -105,7 +105,7 @@ def extract_command_line_arguments(argv):
     filter_file_path = ""
 
     try:
-        opts, args = getopt.getopt(argv, "a:f:", ["apk", "filter"])
+        opts, args = getopt.getopt(argv, "a:f:", ["apk=", "filter="])
     except getopt.GetoptError:
         print("python inspect.py --apk <apk_file> --filter <filter_file>")
         sys.exit(2)
@@ -115,7 +115,7 @@ def extract_command_line_arguments(argv):
             sys.exit()
         elif opt in ["-a", "--apk"]:
             apk_path = arg
-        elif opt in ["-f", "filter"]:
+        elif opt in ["-f", "--filter"]:
             filter_file_path = arg
 
     if apk_path == "":
