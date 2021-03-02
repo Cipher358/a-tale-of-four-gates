@@ -1,5 +1,12 @@
 {
-  "targets": ["providers", "services", "activities"],
-  "object_filters": ["java.lang.StringBuilder"],
-  "method_filters": ["java.lang.Integer:toString"]
+  "targets": [
+    "providers"
+  ],
+  "object_filters": [
+    "android.hardware.Camera",
+    "androidx.camera.lifecycle.ProcessCameraProvider",
+    "androidx.camera.core.CameraXConfig.Provider",
+    "android.hardware.camera2.CameraDevice"
+  ],
+  "method_filters": []
 }
