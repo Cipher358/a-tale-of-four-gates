@@ -37,4 +37,4 @@ For the background activity inspector:
   * possible targets are "providers", "services", and "activities"
   * the format for object filters is the canonical name of the class e.g. "java.lang.StringBuilder"
   * the format for the method filter is canonical name:method name e.g. "java.lang.StringBuilder:append"  
-* Execute `python inspect.py --apk <apk_file> --filter <filter_file>`
+* Execute `python inspect_app.py --apk <apk_file> --filter <filter_file>`
