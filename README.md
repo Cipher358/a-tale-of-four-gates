@@ -15,11 +15,19 @@ There are 3 executable scripts in the project:
 ### Requirements
 For the apk_analyser and scraper scripts, the system must have the following tools installed:
 * Docker: https://docs.docker.com/desktop/
-* apktool: https://github.com/skylot/jadx
+* apktool: https://ibotpeaches.github.io/Apktool/
 * MongoDB: https://www.mongodb.com/try/download/community
 * PlaystoreDownloader: https://github.com/ClaudiuGeorgiu/PlaystoreDownloader
 
-For the background activity inspector package, only apktool is needed.
+For the background activity inspector package:
+* apktool
+
+
+``` sudo apt install apktool```
+* utangle
+
+
+``` pip install untangle```
 
 The apk_analyser also needs a credentials.json file that has not been uploaded to git.
 
