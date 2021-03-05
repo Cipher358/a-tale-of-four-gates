@@ -1,6 +1,7 @@
 {
   "targets": [
-    "providers"
+    "providers",
+    "services"
   ],
   "object_filters": [],
   "method_filters": [
@@ -9,6 +10,7 @@
     "android.hardware.camera2.CameraCaptureSession:captureBurst",
     "android.hardware.camera2.CameraCaptureSession:captureBurstRequests",
     "android.hardware.camera2.CameraCaptureSession:captureSingleRequest",
+    "android.hardware.camera2.CameraManager:openCamera",
     "androidx.camera.core.ImageCapture:takePicture",
     "android.media.MediaRecorder:start",
     "android.media.AudioRecord:read",
