@@ -69,7 +69,8 @@ def find_canonical_name(class_definition_section):
             tokens = line.split(" ")
             for token in tokens:
                 if token.startswith("L"):
-                    canonical_name = token.replace("L", "").replace(";", "").replace("/", ".")
+                    token = token[1:]
+                    canonical_name = token.replace(";", "").replace("/", ".")
                     return canonical_name
     return None
 
