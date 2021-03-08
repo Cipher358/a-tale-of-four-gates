@@ -84,16 +84,25 @@ def build_stack_trace_for_class(apk_handler, smali_handler):
                         filter(lambda x: child_handler.canonical_name + ":" + x[0] in methods_filter,
                                child_invoked_methods.items()))
 
-                    invoked_methods_to_visit.append(called_methods.values())
+                    # Add the new methods to visit to the list
+                    invoked_methods_to_visit.append(called_methods.copy().values())
 
                     new_methods_to_filter = set(
                         map(lambda x: child_handler.canonical_name + ":" + x, called_methods.keys()))
                     methods_filter.update(new_methods_to_filter)
 
-                    if stack_trace.get(child_handler.canonical_name) is None:
+                    # Update the stack_trace object
+                    if child_handler.canonical_name not in stack_trace:
                         stack_trace[child_handler.canonical_name] = called_methods
+
                     else:
-                        stack_trace[child_handler.canonical_name] = called_methods
+                        for top_level_method, methods_invoked_inside in called_methods.items():
+                            if top_level_method not in stack_trace[child_handler.canonical_name]:
+                                stack_trace[child_handler.canonical_name][top_level_method] = methods_invoked_inside
+
+                            else:
+                                stack_trace[child_handler.canonical_name][top_level_method].update(
+                                    methods_invoked_inside)
 
                     break
 
