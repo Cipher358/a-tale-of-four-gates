@@ -32,6 +32,7 @@ class ApkHandler:
             command = command + " --no-src"
 
         command = command + " --output " + self.__output
+        command = command + " --force "
         command = command + " " + self.__file_apk
 
         apktool_output = subprocess.getoutput(command)
