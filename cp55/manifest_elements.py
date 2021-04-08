@@ -14,8 +14,15 @@ class ManifestElement:
         self.grant_uri_permission = None
         self.read_permission = None
         self.write_permission = None
-        self.enabled = False
+        self.enabled = True
         self.exported = False
+
+    def set_defaults(self):
+        if self.enabled is None:
+            self.enabled = True
+
+        if self.exported is None:
+            self.exported = False
 
     def __str__(self):
         properties = list(filter(lambda x: x[1] is not None, vars(self).items()))
@@ -66,6 +73,8 @@ class Activity(ManifestElement):
         self.ui_options = xml_element.get_attribute(prepend_android("uiOptions"))
         self.window_soft_input_mode = xml_element.get_attribute(prepend_android("windowSoftInputMode"))
 
+        self.set_defaults()
+
 
 class ContentProvider(ManifestElement):
 
@@ -87,6 +96,8 @@ class ContentProvider(ManifestElement):
         self.icon = xml_element.get_attribute(prepend_android("icon"))
         self.label = xml_element.get_attribute(prepend_android("label"))
 
+        self.set_defaults()
+
 
 class Service(ManifestElement):
     def __init__(self, xml_element: Element):
@@ -103,6 +114,8 @@ class Service(ManifestElement):
         self.name = xml_element.get_attribute(prepend_android("name"))
         self.permission = xml_element.get_attribute(prepend_android("permission"))
         self.process = xml_element.get_attribute(prepend_android("process"))
+
+        self.set_defaults()
 
 
 class UsesPermission(ManifestElement):

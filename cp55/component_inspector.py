@@ -3,6 +3,8 @@ from cp55.manifest_elements import ContentProvider, Service
 from cp55.manifest_handler import ManifestHandler
 from cp55.smali_handler import SmaliHandler
 
+import json
+
 
 def get_component_type(component):
     if isinstance(component, ContentProvider):
@@ -57,7 +59,12 @@ class ComponentInspector:
             stack_trace = self.__build_stack_trace_for_class(smali_handler)
 
             matches = self.__find_matching_classes(stack_trace)
-            matches.update(self.__find_matching_methods(stack_trace))
+            matches.extend(self.__find_matching_methods(stack_trace))
+
+            if len(matches) == 0:
+                matches = "[]"
+            else:
+                matches = json.dumps(matches)
 
             component_result = {
                 "name": component.name,
@@ -85,26 +92,26 @@ class ComponentInspector:
         """
         Returns true if at least one method present in the stack trace is included in the method filter.
         """
-        matches = set()
+        matches = list()
         for top_level_class, invoked_methods in stack_trace.items():
             for top_level_method, invocations in invoked_methods.items():
                 for called_object, called_methods in invocations.items():
                     for called_method in called_methods:
                         potential_match = called_object + ":" + called_method
                         if potential_match in self.target_methods:
-                            matches.add(potential_match)
+                            matches.append(potential_match)
         return matches
 
     def __find_matching_classes(self, stack_trace):
         """
         Returns true if at least one class present in the stack trace is included in the class filter.
         """
-        matches = set()
+        matches = list()
         for top_level_class, invoked_methods in stack_trace.items():
             for top_level_method, invocations in invoked_methods.items():
                 for called_object in invocations.keys():
                     if called_object in self.target_classes:
-                        matches.add(called_object)
+                        matches.append(called_object)
         return matches
 
     def __build_stack_trace_for_class(self, smali_handler):

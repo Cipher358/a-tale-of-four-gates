@@ -3,10 +3,10 @@
 import json
 import os
 from glob import glob
-import pprint
 
 from cp55.apk_handler import ApkHandler
 from cp55.component_inspector import ComponentInspector
+from database_interface import DatabaseInterface
 
 manifest_file_name = "/AndroidManifest.xml"
 output_directory = "output/"
@@ -31,6 +31,8 @@ def download_apk(package_name):
 
 
 def main():
+    db = DatabaseInterface()
+
     # package_list_file = open("package_names.json", "r")
     # packages = json.load(package_list_file)
 
@@ -39,25 +41,33 @@ def main():
 
     packages = os.listdir(output_directory)
     for input_package in packages:
+        print(input_package)
         # try:
         #     download_apk(input_package)
-        # except Exception as e:
-        #     print("Failed to download")
+        # except Exception:
+        #     db.insert_app(input_package, "download_failed")
         #     continue
 
         apk_path = output_directory + input_package
         # apk_path = output_directory + input_package + apk_file_extension
-        extraction_path = output_directory + input_package
-
         apk_handler = ApkHandler(apk_path)
-        apk_handler.decode_apk()
 
-        component_inspector = ComponentInspector(apk_handler, inspection_filer)
-        result = component_inspector.inspect_background_components()
+        try:
+            apk_handler.decode_apk()
 
-        pprint.pp(result)
+            component_inspector = ComponentInspector(apk_handler, inspection_filer)
+            results = component_inspector.inspect_background_components()
 
-        apk_handler.cleanup()
+            app_id = db.insert_app(input_package, "background")
+            for result in results:
+                result["app_id"] = app_id
+            db.insert_components(results)
+
+            apk_handler.cleanup()
+
+        except Exception:
+            db.insert_app(input_package, "failed")
+            apk_handler.cleanup()
 
 
 if __name__ == "__main__":
