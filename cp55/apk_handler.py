@@ -18,10 +18,11 @@ class ApkHandler:
         else:
             self.__output = output
         self.__smali_paths = None
+        self.__was_decoded = False
 
-    def extract_apk(self):
+    def decode_apk(self):
         """
-        Extracts the apk using apktool's decode function with the parameters passed in the constructor
+        Decodes the apk using apktool's decode function with the parameters passed in the constructor
         TODO: throw error if extraction fails
         """
         command = "apktool decode"
@@ -35,7 +36,11 @@ class ApkHandler:
         command = command + " --force "
         command = command + " " + self.__file_apk
 
+        self.__was_decoded = True
         apktool_output = subprocess.getoutput(command)
+
+    def was_decoded(self):
+        return self.__was_decoded
 
     def get_manifest_file_path(self):
         """
@@ -51,9 +56,11 @@ class ApkHandler:
             raise IOError("Manifest file not found")
 
     def get_smali_file_path(self, canonical_name):
+        if self.__smali_paths is None:
+            self.__build_class_canonical_name_file_path_dict()
         return self.__smali_paths.get(canonical_name, None)
 
-    def build_class_canonical_name_file_path_dict(self):
+    def __build_class_canonical_name_file_path_dict(self):
         smali_paths = []
 
         top_level_directories = list(

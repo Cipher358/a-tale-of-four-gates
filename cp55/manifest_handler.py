@@ -1,7 +1,7 @@
 import untangle
 from typing import List
 
-from manifest_elements import UsesPermission, ContentProvider, Service, Activity, ManifestElement
+from cp55.manifest_elements import UsesPermission, ContentProvider, Service, Activity, ManifestElement
 
 
 class ManifestHandler:

@@ -9,6 +9,13 @@ class ManifestElement:
 
     def __init__(self):
         self.name = ""
+        self.permission = None
+        self.foreground_service_type = None
+        self.grant_uri_permission = None
+        self.read_permission = None
+        self.write_permission = None
+        self.enabled = False
+        self.exported = False
 
     def __str__(self):
         properties = list(filter(lambda x: x[1] is not None, vars(self).items()))
