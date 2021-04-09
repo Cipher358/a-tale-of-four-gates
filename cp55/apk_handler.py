@@ -22,7 +22,8 @@ class ApkHandler:
 
     def decode_apk(self):
         """
-        Decodes the apk using apktool's decode function with the parameters passed in the constructor
+        Decodes the apk using apktool's decode function with the parameters passed in the constructor and returns
+        the output of the command line process.
         TODO: throw error if extraction fails
         """
         command = "apktool decode"
@@ -38,6 +39,8 @@ class ApkHandler:
 
         self.__was_decoded = True
         apktool_output = subprocess.getoutput(command)
+
+        return apktool_output
 
     def was_decoded(self):
         return self.__was_decoded

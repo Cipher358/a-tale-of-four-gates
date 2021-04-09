@@ -33,41 +33,45 @@ def download_apk(package_name):
 def main():
     db = DatabaseInterface()
 
-    # package_list_file = open("package_names.json", "r")
-    # packages = json.load(package_list_file)
+    package_list_file = open("package_names.json", "r")
+    packages = json.load(package_list_file)
 
     inspection_filter_file = open("filter.json", "r")
     inspection_filer = json.load(inspection_filter_file)
 
-    packages = os.listdir(output_directory)
     for input_package in packages:
-        print(input_package)
-        # try:
-        #     download_apk(input_package)
-        # except Exception:
-        #     db.insert_app(input_package, "download_failed")
-        #     continue
+        try:
+            download_apk(input_package)
+        except Exception:
+            db.insert_app(input_package, "download_failed")
+            print("Failed to download app " + input_package + ".")
+            continue
 
-        apk_path = output_directory + input_package
-        # apk_path = output_directory + input_package + apk_file_extension
+        apk_path = output_directory + input_package + apk_file_extension
         apk_handler = ApkHandler(apk_path)
 
         try:
             apk_handler.decode_apk()
 
             component_inspector = ComponentInspector(apk_handler, inspection_filer)
-            results = component_inspector.inspect_background_components()
+            results, analysis_status = component_inspector.inspect_background_components()
 
-            app_id = db.insert_app(input_package, "background")
-            for result in results:
-                result["app_id"] = app_id
-            db.insert_components(results)
+            app_id = db.insert_app(input_package, analysis_status)
+            db.insert_components(app_id, results)
 
             apk_handler.cleanup()
+            if analysis_status == "full":
+                os.remove(apk_path)
+
+            print("Finished analyzing app " + input_package + " with status " + analysis_status +
+                  ". Summary: " + str(len(results)) + " component(s).")
 
         except Exception:
-            db.insert_app(input_package, "failed")
             apk_handler.cleanup()
+            os.remove(apk_path)
+            db.insert_app(input_package, "failed")
+            print("Failed to inspect app " + input_package + " or to store the results in the database.")
+            continue
 
 
 if __name__ == "__main__":

@@ -1,9 +1,9 @@
+import json
+
 from cp55.apk_handler import ApkHandler
 from cp55.manifest_elements import ContentProvider, Service, BroadcastReceiver
 from cp55.manifest_handler import ManifestHandler
 from cp55.smali_handler import SmaliHandler
-
-import json
 
 
 def get_component_type(component):
@@ -42,6 +42,13 @@ class ComponentInspector:
             self.target_classes = None
 
     def inspect_background_components(self):
+        """
+        Inspects the background components of the application (content providers, services, and broadcast receivers)
+        to check if the target classes and methods defined in the filter are present.
+
+        :return: a tuple where the first element is a list of dictionaries representing the analysis result for
+        each individual component and the second element is the status of the analysis
+        """
         result = list()
 
         providers = self.manifest_handler.get_providers()
@@ -53,6 +60,8 @@ class ComponentInspector:
         components.extend(services)
         components.extend(receivers)
 
+        analysis_status = "full"
+
         for component in components:
             path = self.apk_handler.get_smali_file_path(component.name)
 
@@ -63,12 +72,16 @@ class ComponentInspector:
             stack_trace = self.__build_stack_trace_for_class(smali_handler)
 
             matches = self.__find_matching_classes(stack_trace)
-            matches.extend(self.__find_matching_methods(stack_trace))
+            matches.update(self.__find_matching_methods(stack_trace))
 
             if len(matches) == 0:
                 matches = "[]"
             else:
-                matches = json.dumps(matches)
+                matches = json.dumps(list(matches))
+
+            component_has_sql = has_sql(stack_trace)
+            if component_has_sql and isinstance(component, ContentProvider):
+                analysis_status = "background"
 
             component_result = {
                 "name": component.name,
@@ -80,13 +93,13 @@ class ComponentInspector:
                 "grant_uri_permission": component.grant_uri_permission,
                 "write_permission": component.write_permission,
                 "read_permission": component.read_permission,
-                "has_sql": has_sql(stack_trace),
+                "has_sql": component_has_sql,
                 "foreground_service_type": component.foreground_service_type
             }
 
             result.append(component_result)
 
-        return result
+        return result, analysis_status
 
     def inspect_providers_for_sql_injection(self):
         # TODO
@@ -94,28 +107,28 @@ class ComponentInspector:
 
     def __find_matching_methods(self, stack_trace):
         """
-        Returns true if at least one method present in the stack trace is included in the method filter.
+        Returns the set of matching methods.
         """
-        matches = list()
+        matches = set()
         for top_level_class, invoked_methods in stack_trace.items():
             for top_level_method, invocations in invoked_methods.items():
                 for called_object, called_methods in invocations.items():
                     for called_method in called_methods:
                         potential_match = called_object + ":" + called_method
                         if potential_match in self.target_methods:
-                            matches.append(potential_match)
+                            matches.add(potential_match)
         return matches
 
     def __find_matching_classes(self, stack_trace):
         """
-        Returns true if at least one class present in the stack trace is included in the class filter.
+        Returns the set of matching classes.
         """
-        matches = list()
+        matches = set()
         for top_level_class, invoked_methods in stack_trace.items():
             for top_level_method, invocations in invoked_methods.items():
                 for called_object in invocations.keys():
                     if called_object in self.target_classes:
-                        matches.append(called_object)
+                        matches.add(called_object)
         return matches
 
     def __build_stack_trace_for_class(self, smali_handler):

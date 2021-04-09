@@ -18,11 +18,15 @@ class ManifestElement:
         self.exported = False
 
     def set_defaults(self):
-        if self.enabled is None:
+        if self.enabled is None or self.enabled == "true":
             self.enabled = True
+        else:
+            self.enabled = False
 
-        if self.exported is None:
+        if self.exported is None or self.exported == "false":
             self.exported = False
+        else:
+            self.exported = True
 
     def __str__(self):
         properties = list(filter(lambda x: x[1] is not None, vars(self).items()))
@@ -89,6 +93,8 @@ class BroadcastReceiver(ManifestElement):
         self.name = xml_element.get_attribute(prepend_android("name"))
         self.permission = xml_element.get_attribute(prepend_android("permission"))
         self.process = xml_element.get_attribute(prepend_android("process"))
+
+        self.set_defaults()
 
 
 class ContentProvider(ManifestElement):

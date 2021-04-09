@@ -1,3 +1,5 @@
+import os
+
 import mysql.connector
 
 
@@ -7,7 +9,7 @@ class DatabaseInterface:
         self.endpoint = "cp55.ckxgs3folg2a.eu-west-1.rds.amazonaws.com"
         self.port = "3306"
         self.user = "admin"
-        self.passwd = "*********"
+        self.passwd = os.environ["CP55PASSWD"]
         self.db_name = "cp55"
 
     def get_connection(self):
@@ -30,7 +32,10 @@ class DatabaseInterface:
 
         return cursor.lastrowid
 
-    def insert_components(self, components):
+    def insert_components(self, app_id, components):
+        for component in components:
+            component["app_id"] = app_id
+
         query = "INSERT INTO components (app_id, name, type, enabled, exported, filter_matches, permission, " \
                 "grant_uri_permission, write_permission, read_permission, has_sql, foreground_service_type) " \
                 "VALUES (%(app_id)s, %(name)s, %(type)s, %(enabled)s, %(exported)s, %(filter_matches)s, " \
