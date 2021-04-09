@@ -1,7 +1,7 @@
 import untangle
 from typing import List
 
-from cp55.manifest_elements import UsesPermission, ContentProvider, Service, Activity, ManifestElement
+from cp55.manifest_elements import UsesPermission, ContentProvider, Service, BroadcastReceiver, Activity, ManifestElement
 
 
 class ManifestHandler:
@@ -29,6 +29,11 @@ class ManifestHandler:
             self.__providers = []
 
         try:
+            self.__receivers = list(map(lambda x: BroadcastReceiver(x), manifest.application.receiver))
+        except AttributeError:
+            self.__receivers = []
+
+        try:
             self.__activities = list(map(lambda x: Activity(x), manifest.application.activity))
         except AttributeError:
             self.__activities = []
@@ -44,3 +49,6 @@ class ManifestHandler:
 
     def get_services(self) -> List[ManifestElement]:
         return self.__services
+
+    def get_receivers(self) -> List[ManifestElement]:
+        return self.__receivers

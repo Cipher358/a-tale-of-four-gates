@@ -76,6 +76,21 @@ class Activity(ManifestElement):
         self.set_defaults()
 
 
+class BroadcastReceiver(ManifestElement):
+
+    def __init__(self, xml_element: Element):
+        super().__init__()
+
+        self.direct_boot_aware = xml_element.get_attribute(prepend_android("directBootAware"))
+        self.enabled = xml_element.get_attribute(prepend_android("enabled"))
+        self.exported = xml_element.get_attribute(prepend_android("exported"))
+        self.icon = xml_element.get_attribute(prepend_android("icon"))
+        self.label = xml_element.get_attribute(prepend_android("label"))
+        self.name = xml_element.get_attribute(prepend_android("name"))
+        self.permission = xml_element.get_attribute(prepend_android("permission"))
+        self.process = xml_element.get_attribute(prepend_android("process"))
+
+
 class ContentProvider(ManifestElement):
 
     def __init__(self, xml_element: Element):

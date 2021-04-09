@@ -1,5 +1,5 @@
 from cp55.apk_handler import ApkHandler
-from cp55.manifest_elements import ContentProvider, Service
+from cp55.manifest_elements import ContentProvider, Service, BroadcastReceiver
 from cp55.manifest_handler import ManifestHandler
 from cp55.smali_handler import SmaliHandler
 
@@ -11,6 +11,8 @@ def get_component_type(component):
         return "provider"
     elif isinstance(component, Service):
         return "service"
+    elif isinstance(component, BroadcastReceiver):
+        return "receiver"
 
 
 def has_sql(stack_trace):
@@ -44,10 +46,12 @@ class ComponentInspector:
 
         providers = self.manifest_handler.get_providers()
         services = self.manifest_handler.get_services()
+        receivers = self.manifest_handler.get_receivers()
 
         components = list()
         components.extend(providers)
         components.extend(services)
+        components.extend(receivers)
 
         for component in components:
             path = self.apk_handler.get_smali_file_path(component.name)
