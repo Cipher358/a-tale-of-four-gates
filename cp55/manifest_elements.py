@@ -17,6 +17,7 @@ class ManifestElement:
         self.write_permission = None
         self.enabled = True
         self.exported = False
+        self.direct_boot_aware = False
 
     def set_defaults(self):
         if self.enabled is None or self.enabled == "true":
@@ -28,6 +29,11 @@ class ManifestElement:
             self.exported = False
         else:
             self.exported = True
+
+        if self.direct_boot_aware is None or self.direct_boot_aware == "false":
+            self.direct_boot_aware = False
+        else:
+            self.direct_boot_aware = True
 
     def __str__(self):
         properties = list(filter(lambda x: x[1] is not None, vars(self).items()))

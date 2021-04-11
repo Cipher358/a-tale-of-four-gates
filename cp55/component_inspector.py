@@ -88,6 +88,7 @@ class ComponentInspector:
                 "type": get_component_type(component),
                 "enabled": component.enabled,
                 "exported": component.exported,
+                "direct_boot_aware": component.direct_boot_aware,
                 "filter_matches": matches,
                 "authorities": component.authorities,
                 "permission": component.permission,
