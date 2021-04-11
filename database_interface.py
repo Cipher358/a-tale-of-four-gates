@@ -39,8 +39,8 @@ class DatabaseInterface:
         query = "INSERT INTO components (app_id, name, type, enabled, exported, direct_boot_aware, filter_matches, " \
                 "permission, authorities, grant_uri_permission, write_permission, read_permission, has_sql, " \
                 "foreground_service_type) " \
-                "VALUES (%(app_id)s, %(name)s, %(type)s, %(enabled)s, %(exported)s, %s(direct_boot_aware)s, " \
-                "%(filter_matches)s, %(permission)s, %s(authorities), %(grant_uri_permission)s, " \
+                "VALUES (%(app_id)s, %(name)s, %(type)s, %(enabled)s, %(exported)s, %(direct_boot_aware)s, " \
+                "%(filter_matches)s, %(permission)s, %(authorities)s, %(grant_uri_permission)s, " \
                 "%(write_permission)s, %(read_permission)s, %(has_sql)s, %(foreground_service_type)s);"
 
         conn = self.get_connection()
