@@ -89,6 +89,7 @@ class ComponentInspector:
                 "enabled": component.enabled,
                 "exported": component.exported,
                 "filter_matches": matches,
+                "authorities": component.authorities,
                 "permission": component.permission,
                 "grant_uri_permission": component.grant_uri_permission,
                 "write_permission": component.write_permission,

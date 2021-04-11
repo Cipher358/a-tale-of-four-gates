@@ -12,6 +12,7 @@ class ManifestElement:
         self.permission = None
         self.foreground_service_type = None
         self.grant_uri_permission = None
+        self.authorities = None
         self.read_permission = None
         self.write_permission = None
         self.enabled = True
