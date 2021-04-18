@@ -1,9 +1,11 @@
 import json
+import re
 
 from cp55.apk_handler import ApkHandler
 from cp55.manifest_elements import ContentProvider, Service, BroadcastReceiver
 from cp55.manifest_handler import ManifestHandler
 from cp55.smali_handler import SmaliHandler
+from cp55.sql_injection_checker import SqlInjectionChecker
 
 
 def get_component_type(component):
@@ -22,6 +24,14 @@ def has_sql(stack_trace):
                 if "sql" in called_object.lower():
                     return True
     return False
+
+
+sql_start_functions = [("insert(Landroid/net/Uri;Landroid/content/ContentValues;)Landroid/net/Uri;", {"p2"}),
+                       ("query(Landroid/net/Uri;[Ljava/lang/String;Ljava/lang/String;" +
+                        "[Ljava/lang/String;Ljava/lang/String;)Landroid/database/Cursor", {"p2", "p3", "p4", "p5"}),
+                       ("update(Landroid/net/Uri;Landroid/content/ContentValues;" +
+                        "Ljava/lang/String;[Ljava/lang/String;)I", {"p2", "p3"}),
+                       ("delete(Landroid/net/Uri;Ljava/lang/String;[Ljava/lang/String;)I", {"p2", "p3"})]
 
 
 class ComponentInspector:
@@ -104,8 +114,34 @@ class ComponentInspector:
         return result, analysis_status
 
     def inspect_providers_for_sql_injection(self):
-        # TODO
-        return None
+        result = list()
+
+        sql_checker = SqlInjectionChecker(self.apk_handler)
+
+        providers = self.manifest_handler.get_providers()
+        for provider in providers:
+            path = self.apk_handler.get_smali_file_path(provider.name)
+
+            if path is None:
+                continue
+
+            smali_handler = SmaliHandler(path)
+
+            for (start_function, arguments) in sql_start_functions:
+                method = smali_handler.get_method(start_function)
+                method_name = re.findall(".*\(", start_function)[0][:-1]
+
+                has_query_checks = sql_checker.check_method(method, arguments)
+                has_uri_checks = sql_checker.check_method(method, {"p1"})
+
+                result.append({
+                    "provider_name": provider.name,
+                    "method_name": method_name,
+                    "has_query_checks": has_query_checks,
+                    "has_uri_checks": has_uri_checks
+                })
+
+        return result
 
     def __find_matching_methods(self, stack_trace):
         """
