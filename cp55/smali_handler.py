@@ -110,3 +110,16 @@ class SmaliHandler:
 
     def get_methods(self):
         return self.methods
+
+    def get_method(self, method_name):
+        """
+        Returns the lines/content of the method given the method name
+
+        :param method_name: can have the following form
+                            "insert(Landroid/net/Uri;Landroid/content/ContentValues;)Landroid/net/Uri;"
+        :return: the content of the method
+        """
+        for name, lines in self.methods.items():
+            if method_name in name:
+                return lines
+        return None
