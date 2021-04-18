@@ -54,17 +54,27 @@ def main():
             apk_handler.decode_apk()
 
             component_inspector = ComponentInspector(apk_handler, inspection_filer)
-            results, analysis_status = component_inspector.inspect_background_components()
+            background_results, analysis_status = component_inspector.inspect_background_components()
 
             app_id = db.insert_app(input_package, analysis_status)
-            db.insert_components(app_id, results)
+            db.insert_components(app_id, background_results)
 
-            apk_handler.cleanup()
             if analysis_status == "full":
                 os.remove(apk_path)
+                print("Finished analyzing app " + input_package + " with status " + analysis_status +
+                      ". Summary: " + str(len(background_results)) + " component(s).")
 
-            print("Finished analyzing app " + input_package + " with status " + analysis_status +
-                  ". Summary: " + str(len(results)) + " component(s).")
+            elif analysis_status == "background":
+                sql_results = component_inspector.inspect_providers_for_sql_injection()
+
+                db.insert_sql_checks(app_id, sql_results)
+                db.update_app_analysis_status(app_id, "full")
+
+                print("Finished analyzing app " + input_package + " with status " + analysis_status +
+                      ". Summary: " + str(len(background_results)) + " component(s). Also analyzed " +
+                      str(len(sql_results)) + " methods for sql vulnerabilities.")
+
+            apk_handler.cleanup()
 
         except Exception:
             apk_handler.cleanup()
