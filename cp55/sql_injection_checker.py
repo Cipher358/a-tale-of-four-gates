@@ -25,6 +25,10 @@ def is_sql_api_call(method_call):
 
 def split_sections(method):
     sections = {}
+
+    if method is None:
+        return sections
+
     current_section = list()
     current_section_name = "start"
     sections[current_section_name] = current_section
@@ -49,8 +53,10 @@ def split_sections(method):
         elif line.startswith("."):
             if line.startswith(".packed-switch"):
                 in_pswitch_data = True
+                current_section.append(line)
             elif line == ".end packed-switch":
                 in_pswitch_data = False
+                current_section.append(line)
             else:
                 continue
         else:
@@ -67,13 +73,18 @@ def split_sections(method):
 def build_execution_paths(method):
     sections = split_sections(method)
 
+    if len(sections) == 0:
+        return []
+
     visited_sections = set()
     visited_sections.add("start")
 
     execution_paths = list()
     execution_paths.append(sections["start"])
 
-    while visited_sections != set(sections.keys()):
+    old_visited_sections_number = -1
+    while visited_sections != set(sections.keys()) and old_visited_sections_number != len(visited_sections):
+        old_visited_sections_number = len(visited_sections)
         new_execution_paths = list()
         while len(execution_paths) > 0:
             path = execution_paths.pop(0)
