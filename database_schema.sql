@@ -27,3 +27,15 @@ CREATE TABLE components
     FOREIGN KEY (app_id) references apps (id)
 );
 
+CREATE TABLE sql_checks
+(
+    id               INT NOT NULL AUTO_INCREMENT,
+    app_id           INT,
+    provider_name    VARCHAR(255),
+    method_name      VARCHAR(255),
+    has_query_checks BOOL,
+    has_uri_checks   BOOL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (app_id) references apps (id)
+)
+

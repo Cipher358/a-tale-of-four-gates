@@ -50,3 +50,41 @@ class DatabaseInterface:
         conn.commit()
 
         return cursor.lastrowid
+
+    def insert_sql_checks(self, app_id, sql_checks):
+        for sql_check in sql_checks:
+            sql_check["app_id"] = app_id
+
+        query = "INSERT INTO sql_checks (app_id, provider_name, method_name, has_query_checks, has_uri_checks)" \
+                "VALUES (%(app_id)s, %(provider_name)s, %(method_name)s, %(has_query_checks)s, %(has_uri_checks)s);"
+
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        cursor.executemany(query, sql_checks)
+
+        conn.commit()
+
+        return cursor.lastrowid
+
+    def update_app_analysis_status(self, app_id, status):
+        query = "UPDATE apps SET analysis_status = %s WHERE id = %s;"
+        values = (status, app_id)
+
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        cursor.execute(query, values)
+
+        conn.commit()
+
+        return cursor.lastrowid
+
+    def get_app_id_by_package_name(self, package_name):
+        query = "SELECT id FROM apps WHERE package_name = %s;"
+
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        cursor.execute(query, (package_name,))
+
+        app_id = cursor.fetchone()
+
+        return app_id[0]
