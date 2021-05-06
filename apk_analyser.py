@@ -17,7 +17,7 @@ def download_apk(package_name):
     docker_command = "docker run \
     -u $(id -u):$(id -g) \
     -v \"${PWD}/credentials.json\":\"/app/credentials.json\" \
-    -v \"${PWD}/output/\":\"/app/Downloads/\" \
+    -v \"${PWD}/\"" + output_directory + ":\"/app/Downloads/\" \
     -p 5000:5000 \
     --entrypoint=python3 \
     --rm downloader download.py -c /app/credentials.json \"" + package_name + "\""
