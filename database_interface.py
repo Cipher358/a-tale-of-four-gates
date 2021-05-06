@@ -1,6 +1,7 @@
 import os
 
 import mysql.connector
+import pprint
 
 
 class DatabaseInterface:
@@ -9,10 +10,13 @@ class DatabaseInterface:
         self.endpoint = "cp55.ckxgs3folg2a.eu-west-1.rds.amazonaws.com"
         self.port = "3306"
         self.user = "admin"
-        self.passwd = os.environ["CP55PASSWD"]
+        self.passwd = os.getenv("CP55PASSWD")
         self.db_name = "cp55"
 
     def get_connection(self):
+        if self.passwd is None:
+            return None
+
         try:
             conn = mysql.connector.connect(host=self.endpoint, user=self.user, passwd=self.passwd,
                                            port=self.port, database=self.db_name)
@@ -25,6 +29,10 @@ class DatabaseInterface:
         values = (package_name, analysis_status)
 
         conn = self.get_connection()
+        if conn is None:
+            pprint.pp("App: " + package_name + ". analysis status: " + analysis_status)
+            return
+
         cursor = conn.cursor()
         cursor.execute(query, values)
 
@@ -44,6 +52,10 @@ class DatabaseInterface:
                 "%(write_permission)s, %(read_permission)s, %(has_sql)s, %(foreground_service_type)s);"
 
         conn = self.get_connection()
+        if conn is None:
+            pprint.pp(components)
+            return
+
         cursor = conn.cursor()
         cursor.executemany(query, components)
 
@@ -59,6 +71,10 @@ class DatabaseInterface:
                 "VALUES (%(app_id)s, %(provider_name)s, %(method_name)s, %(has_query_checks)s, %(has_uri_checks)s);"
 
         conn = self.get_connection()
+        if conn is None:
+            pprint.pp(sql_checks)
+            return
+
         cursor = conn.cursor()
         cursor.executemany(query, sql_checks)
 
@@ -71,6 +87,9 @@ class DatabaseInterface:
         values = (status, app_id)
 
         conn = self.get_connection()
+        if conn is None:
+            return
+
         cursor = conn.cursor()
         cursor.execute(query, values)
 
@@ -82,6 +101,9 @@ class DatabaseInterface:
         query = "SELECT id FROM apps WHERE package_name = %s;"
 
         conn = self.get_connection()
+        if conn is None:
+            return
+
         cursor = conn.cursor()
         cursor.execute(query, (package_name,))
 
