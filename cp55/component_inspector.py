@@ -129,7 +129,7 @@ class ComponentInspector:
 
             for (start_function, arguments) in sql_start_functions:
                 method = smali_handler.get_method(start_function)
-                method_name = re.findall(".*\(", start_function)[0][:-1]
+                method_name = re.findall(".*\\(", start_function)[0][:-1]
 
                 has_query_checks = sql_checker.check_method(method, arguments)
                 has_uri_checks = sql_checker.check_method(method, {"p1"})
@@ -187,11 +187,9 @@ class ComponentInspector:
         :param smali_handler: the smali handler of the object for which the stack trace is built
         :return: the stack trace like data structure defined above
         """
-        visited_classes = set()
         canonical_name = smali_handler.canonical_name
         invoked_methods = smali_handler.invoked_methods
 
-        visited_classes.add(canonical_name)
         invoked_methods_to_visit = list()
         methods_filter = set()
 
@@ -207,7 +205,6 @@ class ComponentInspector:
                     full_method_names = set(map(lambda x: java_class + ":" + x, methods))
 
                     if path_to_class is None or full_method_names.issubset(methods_filter):
-                        visited_classes.add(java_class)
                         continue
                     else:
                         for method in methods:
