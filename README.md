@@ -1,3 +1,7 @@
+### Research paper
+
+Please find A Tale of Four Gates here: https://link.springer.com/chapter/10.1007/978-3-031-17146-8_12
+
 ### Overview
 There are 2 executable scripts in the project:
 * `python3 ./apk_analyser.py [app.apk]`:
